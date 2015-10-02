@@ -3,9 +3,9 @@
 // Company: 
 // Engineer: 
 // 
-// Create Date:    19:28:52 09/25/2015 
+// Create Date:    21:51:13 09/25/2015 
 // Design Name: 
-// Module Name:    PWM 
+// Module Name:    PWM1 
 // Project Name: 
 // Target Devices: 
 // Tool versions: 
@@ -18,14 +18,20 @@
 // Additional Comments: 
 //
 //////////////////////////////////////////////////////////////////////////////////
-module PWM(
-    input clk,
-    input [3:0] PWM_in,
-    output PWM_out
-);
+module SimplePWM(
+	input clk_in,						//clock for counter
+	input [7:0] x_in, 				//control value that
+										//defines pulse width
+	output reg PWM_out = 1);		//PWM signal out
 
-reg [3:0] cnt;
-always @(posedge clk) cnt <= cnt + 1'b1;  // free-running counter
-
-assign ;  // comparator
-endmodulePWM_out = (PWM_in > cnt)
+	reg [7:0] counter = 0;
+	
+	always@ (posedge clk_in )
+		begin
+			if ( counter < x_in )
+				PWM_out <= 1;
+			else
+				PWM_out <= 0;
+				counter <= counter+1;
+		end
+endmodule
