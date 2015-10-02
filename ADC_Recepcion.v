@@ -1,22 +1,9 @@
 `timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
-// 
-// Create Date:    17:24:05 09/28/2015 
+// Create Date:    23:12:06 09/30/2015 
 // Design Name: 
 // Module Name:    ADC_Recepcion
-// Project Name: 
-// Target Devices: 
-// Tool versions: 
-// Description: 
-//
-// Dependencies: 
-//
-// Revision: 
-// Revision 0.01 - File Created
-// Additional Comments: 
-//
+
 //////////////////////////////////////////////////////////////////////////////////
 module ADC_Recepcion(
 input wire SDATA, reset ,CS,SCLK,
@@ -67,7 +54,9 @@ always @*
 			if(~CS)
 				begin
 				state_next = Recibir;
-					n_next = 4'd0;
+				n_next = 4'd0;
+
+				b_next={b_reg[14:0],SDATA};
 				end
 
 			else state_next = DetectaCS;
@@ -76,7 +65,7 @@ always @*
 		Recibir :
 			begin
 				b_next = {b_reg [14:0], SDATA}; /// se llena registro desplazamiento
-				if(n_reg == 4'd15)
+				if(n_reg == 4'd14)
 					state_next = Carga;
 				else 
 					n_next = n_reg + 4'd1;
