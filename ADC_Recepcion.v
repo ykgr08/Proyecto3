@@ -1,11 +1,11 @@
 `timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
+// Company: Iron Pirate
+// Engineer: Edgar Campos Duarte
 // 
-// Create Date:    14:18:29 09/22/2015 
+// Create Date:    21:19:30 09/18/2015 
 // Design Name: 
-// Module Name:    ADC_MarkV 
+// Module Name:    ADC_3 
 // Project Name: 
 // Target Devices: 
 // Tool versions: 
@@ -18,28 +18,36 @@
 // Additional Comments: 
 //
 //////////////////////////////////////////////////////////////////////////////////
-module ADC_Recepcion(
+module ADC_3(
+input wire SCLK,reset, ///Clock de la con la 40 la frecuencia de muestreo y reset
 
-input wire CS,SCLK,reset, ///Clock de la con la 40 la frecuencia de muestreo y reset
 
 input wire ADCdata,rx_en,/// Datos que provienen del ADC, Clock del Adc y habilitador de recibimiento de datos
+
+input wire temp_finish,
+
+output reg En_temp,
 
 output reg rx_done_tick, ///Bandera que indica que ya todos los datos fueren recibidos
 
 output reg [15:0] b_reg, ///Variable donde se almacenan los 16 datos provenientes del ADC
 
-output wire [11:0] data_out///Datos que realmente necesito del ADC
+output wire [11:0] data_out,///Datos que realmente necesito del ADC
+
+output wire CS
 
     );
+
 
 //Symbolic state declaration
 
 localparam [1:0]
 	idle = 2'b00,
 	dps= 2'b01,   ///Estado de la maquina
-	load= 2'b10;
+	load= 2'b10,
+	temp=2'b11;
 
-///Declaracion de las señales
+///Declaracion de las seÃ±ales
 
 reg [1:0] state_reg,state_next; ///Variables para cambiar de  estado
 
@@ -49,20 +57,25 @@ reg [3:0] n_reg,n_next;  /// Leavan la cuenta de cuatos datos se han lamacenado,
 
 reg [15:0] b_next; ///Variable donde se almacenan los datos provenientes del ADC
 
-///Máquina de estados que se encarga de recibir los datos
+reg CS_reg,CS_next;
 
-always @(posedge reset , negedge SCLK)    /////Aqui se inicializan los estados y se actualizan las variables
+
+///MÃ¡quina de estados que se encarga de recibir los datos
+
+always @(posedge reset , posedge SCLK)    /////Aqui se inicializan los estados y se actualizan las variables
 	if (reset)
 		begin
 		state_reg <= idle;
-		n_reg <= 4'd0;
-		b_reg <= 16'd0;
+		n_reg <= 4'b00000;
+		b_reg <= 5'b00000;
+		CS_reg<=1;
 		end
 	else
 		begin
 			state_reg <= state_next;
 			n_reg <= n_next;
 			b_reg <= b_next;
+			CS_reg<=CS_next;
 
 		end
 
@@ -74,11 +87,12 @@ begin
 	rx_done_tick=1'b0;  //Se incializa la bandera
 	n_next=n_reg; //Se actualiza la variable que lleva la cuenta de las variables que son empaquetadas
 	b_next=b_reg; /// Aqui se almacenan los datos que son enviados del ADC
-
+	CS_next =CS_reg;
+	En_temp=1'b1;
 	case(state_reg)
 
 		idle:
-			if(rx_en & ~CS)
+			if(rx_en & CS_next)
 
 				begin
 
@@ -91,10 +105,13 @@ begin
 
 				state_next =dps;  //Se pasa al estado dps
 			
+				CS_next =0;
 
 				end
 
 		dps: //3 ceros + 12 data 
+
+			
 
 				begin
 					b_next= {b_reg[14:0],ADCdata}; //Se empaquetan los 3 ceros y los 12 datos que se desean toamr del ADC
@@ -104,26 +121,45 @@ begin
 						state_next =load;
 
 					else
-						n_next = n_reg-4'd1;
+						n_next = n_reg-4'b0001;
 
 				end
 
 		load: // extra clock to complete the last shift
 
 			begin
-				state_next =idle;
+				state_next =temp;
 				rx_done_tick='b1;
-
+				CS_next =1'b1;
+				En_temp=1'b0;
 			end
-	
+			
+		temp:
+
+			if(temp_finish)
+			begin
+				state_next=idle;
+				En_temp=1'b1;
+				CS_next=1'b1;
+			end
+			else
+			begin
+				state_next=temp;
+				En_temp=1'b0;
+				CS_next=1'b1;
+			end
 		default 
 		
 			state_next =idle;
 			
+			
+
 		endcase
 
 	end
 
 	assign data_out = b_reg[11:0]; //Aqui se asigan los 12 datos que se necesitan del ADC
+
+	assign CS=CS_reg;
 
 endmodule
