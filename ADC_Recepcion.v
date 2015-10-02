@@ -5,7 +5,7 @@
 // 
 // Create Date:    17:24:05 09/28/2015 
 // Design Name: 
-// Module Name:    ADC4
+// Module Name:    ADC_Recepcion
 // Project Name: 
 // Target Devices: 
 // Tool versions: 
