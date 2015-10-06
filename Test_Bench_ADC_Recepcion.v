@@ -2,45 +2,52 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
+
 module Test_ADC_Recepcion;
 
 	// Inputs
-	reg clk_nexys;
+	reg SCLK;
 	reg reset;
 	reg ADCdata;
 	reg rx_en;
+	reg temp_finish;
+
 
 	// Outputs
+	wire En_temp;
 	wire rx_done_tick;
 	wire [15:0] b_reg;
 	wire [11:0] data_out;
 	wire CS;
-	wire SCLK;
 
 	// Instantiate the Unit Under Test (UUT)
 	ADC_Recepcion uut (
-		.clk_nexys(clk_nexys), 
+		.SCLK(SCLK), 
 		.reset(reset), 
 		.ADCdata(ADCdata), 
 		.rx_en(rx_en), 
+		.temp_finish(temp_finish), 
+		.En_temp(En_temp), 
 		.rx_done_tick(rx_done_tick), 
 		.b_reg(b_reg), 
-		.data_out(data_out),
-		.CS(CS),
-		.SCLK(SCLK)
-		
+		.data_out(data_out), 
+		.CS(CS)
 	);
-	integer i,j;
+
+		integer i,j;
 	reg [15:0] datos_txt;
 	reg [15:0] Memoria [0:15];
+	reg enable_timer;
 	initial begin
 		// Initialize Inputs
-		clk_nexys = 0;
+		SCLK= 0;
 		reset = 1;
+		temp_finish=0;
 		ADCdata = 0;
 		rx_en = 1;
+		enable_timer=0;
 		$readmemb("Datos_MarkV.txt",Memoria);
-	repeat(5) @(posedge clk_nexys)
+	repeat(5) @(posedge SCLK)
 		reset=0;
 	end
 
@@ -50,24 +57,34 @@ module Test_ADC_Recepcion;
 				begin
 				datos_txt=Memoria[j];
 
+				repeat(32)@(posedge SCLK)
+				enable_timer=1;
 			for (i=0;i==15;i=i+1)
 				begin
 
-				@(negedge CS)
+				@(posedge SCLK)
 				ADCdata=datos_txt[i];
 				end
 			ADCdata=1;
+			enable_timer=0;
 
 				end
 
 		end
 
+initial begin
+	@(posedge enable_timer)
+	while(enable_timer)
+	#22700 temp_finish=~temp_finish;
+	end
 
 initial forever begin
 
-#10 clk_nexys =~clk_nexys;
+#709 SCLK =~SCLK;
 
 end
       
 endmodule
+      
+
 
