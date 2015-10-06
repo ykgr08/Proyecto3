@@ -1,14 +1,34 @@
 `timescale 1ns / 1ps
 
 ////////////////////////////////////////////////////////////////////////////////
+// Company: 
+// Engineer:
+//
+// Create Date:   17:54:43 09/30/2015
+// Design Name:   Recepcion
+// Module Name:   C:/Users/WIN8/Desktop/Pruebas del ADC/Pruebas_ADC/Test_Bench_Recepcion_YOLO.v
+// Project Name:  Pruebas_ADC
+// Target Device:  
+// Tool versions:  
+// Description: 
+//
+// Verilog Test Fixture created by ISE for module: Recepcion
+//
+// Dependencies:
+// 
+// Revision:
+// Revision 0.01 - File Created
+// Additional Comments:
+// 
+////////////////////////////////////////////////////////////////////////////////
 
-module Test_ADC_Recepcion;
+module Test_Bench_Recepcion_YOLO;
 
 	// Inputs
-	reg SDATA;
-	reg reset;
-	reg CS;
 	reg SCLK;
+	reg CS;
+	reg reset;
+	reg [15:0] datos;
 
 	// Outputs
 	wire rx_done_tick;
@@ -16,62 +36,68 @@ module Test_ADC_Recepcion;
 	wire [11:0] data_Out;
 
 	// Instantiate the Unit Under Test (UUT)
-	ADC_Recepcion uut (
-		.SDATA(SDATA), 
-		.reset(reset), 
-		.CS(CS), 
+	Recepcion uut (
 		.SCLK(SCLK), 
+		.CS(CS), 
+		.reset(reset), 
+		.datos(datos), 
 		.rx_done_tick(rx_done_tick), 
 		.b_reg(b_reg), 
 		.data_Out(data_Out)
 	);
+	
+	integer j;
 
-integer i,j;
-	reg [15:0] data_txt;
-	reg [15:0] Memoria [0:15];
-	reg enable_CS;
+	reg [15:0] Mem [0:15];
 
 	initial begin
 		// Initialize Inputs
-		reset = 1;
-		SDATA = 0;
-	
-		SCLK = 0;
+		SCLK = 1;
 		CS = 1;
-		enable_CS = 0;
-		$readmemb("Datos.txt",Memoria);
-	repeat(5) @(negedge SCLK)
+		reset = 1;
+		datos = 0;
+
+		$readmemb("DatosParalelo.txt",Mem);
+
+		repeat(5) @(posedge SCLK)
+
 		reset=0;
+
 	end
-      
-     initial begin
-     	@(negedge reset, negedge CS)
-     		for(j=0;j<16;j=j+1)
-     			begin
-     			data_txt=Memoria[j];
-			repeat(2)@(negedge SCLK)
-				enable_CS = 1;
-			
-     		for (i=0;i==15;i=i+1)
-     			begin
 
-     			@(negedge SCLK)
-     			SDATA=data_txt[i];
-     			end
-     		SDATA=1;
-			enable_CS = 0;
+		initial begin
 
-     			end
-     	end
+	@(negedge reset)
 
- initial begin
- @(negedge enable_CS)
-	while (enable_CS)
-		#1000 CS = ~ CS;
- end
+		for(j=0;j<16;j=j+1)
 
- initial forever begin
-  #25 SCLK = ~ SCLK;
- end
+			begin
 
+				datos=Mem[j];
+
+		repeat(16) @(posedge SCLK);
+
+			end
+
+	$stop;
+
+	end
+
+
+initial forever begin
+
+	#515 SCLK=~SCLK;
+
+	end
+
+
+initial forever begin
+
+	#22700 CS=~CS;
+
+	end
+
+
+	
 endmodule
+
