@@ -4,15 +4,15 @@
 // Company: 
 // Engineer:
 //
-// Create Date:   17:54:43 09/30/2015
-// Design Name:   Recepcion
-// Module Name:   C:/Users/WIN8/Desktop/Pruebas del ADC/Pruebas_ADC/Test_Bench_Recepcion_YOLO.v
+// Create Date:   23:22:57 09/30/2015
+// Design Name:   Recepcion_Version2
+// Module Name:   C:/Users/WIN8/Desktop/Pruebas del ADC/Pruebas_ADC/TestBenchRecepcionVersion2.v
 // Project Name:  Pruebas_ADC
 // Target Device:  
 // Tool versions:  
 // Description: 
 //
-// Verilog Test Fixture created by ISE for module: Recepcion
+// Verilog Test Fixture created by ISE for module: Recepcion_Version2
 //
 // Dependencies:
 // 
@@ -22,7 +22,7 @@
 // 
 ////////////////////////////////////////////////////////////////////////////////
 
-module Test_Bench_Recepcion_YOLO;
+module Test_ADC_Recepcion;
 
 	// Inputs
 	reg SCLK;
@@ -36,7 +36,7 @@ module Test_Bench_Recepcion_YOLO;
 	wire [11:0] data_Out;
 
 	// Instantiate the Unit Under Test (UUT)
-	Recepcion uut (
+	ADC_Recepcion uut (
 		.SCLK(SCLK), 
 		.CS(CS), 
 		.reset(reset), 
@@ -45,8 +45,8 @@ module Test_Bench_Recepcion_YOLO;
 		.b_reg(b_reg), 
 		.data_Out(data_Out)
 	);
-	
-	integer j;
+
+integer j;
 
 	reg [15:0] Mem [0:15];
 
@@ -75,7 +75,7 @@ module Test_Bench_Recepcion_YOLO;
 
 				datos=Mem[j];
 
-		repeat(16) @(posedge SCLK);
+		repeat(22) @(posedge SCLK);
 
 			end
 
@@ -100,4 +100,5 @@ initial forever begin
 
 	
 endmodule
+
 
