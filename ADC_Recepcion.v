@@ -1,15 +1,28 @@
 `timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
-// Create Date:    23:12:06 09/30/2015 
+// Company: 
+// Engineer: 
+// 
+// Create Date:    20:20:48 10/01/2015 
 // Design Name: 
-// Module Name:    ADC_Recepcion
-
+// Module Name:    ADC_Recepcion 
+// Project Name: 
+// Target Devices: 
+// Tool versions: 
+// Description: 
+//
+// Dependencies: 
+//
+// Revision: 
+// Revision 0.01 - File Created
+// Additional Comments: 
+//
 //////////////////////////////////////////////////////////////////////////////////
 module ADC_Recepcion(
 input wire SDATA, reset ,CS,SCLK,
 output reg rx_done_tick, 
 output reg [15:0] b_reg,
-output wire [11:0]data_Out
+output wire [28:0]data_Out
     );
 
 localparam [1:0]
@@ -22,6 +35,7 @@ localparam [1:0]
 	reg[1:0] state_reg , state_next; // cambiar estado
 	reg [3:0] n_reg, n_next; /// Para llevar cuenta de datos recibidos
 	reg [15:0] b_next;
+
 
 /////Partes secuencial
 	always @(posedge reset,  negedge SCLK)
@@ -88,6 +102,7 @@ always @*
 end
 	
 
-assign data_Out = b_reg [11:0];
+assign data_Out = {{12{~{b_reg [11]}}},b_reg [10:0],6'b000000};
 
 endmodule
+
